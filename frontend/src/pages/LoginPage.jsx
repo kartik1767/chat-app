@@ -31,7 +31,7 @@ const LoginPage = () => {
               >
                 <img src="/gupshup.png"/>
               </div>
-            <h1 className="text-2xl font-bold mt-2">Welcome Back</h1>
+            <h1 className="text-2xl font-bold mt-2">Welcome Back!</h1>
               <p className="text-base-content/60">Sign in to your account</p>
             </div>
           </div>
