@@ -4,7 +4,7 @@
 
 [Video Tutorial on Youtube](https://youtu.be/ntKkVrQqBYY)
 
-Highlights:
+Highlights-
 
 - 🌟 Tech stack: MERN + Socket.io + TailwindCSS + Daisy UI
 - 🎃 Authentication && Authorization with JWT
