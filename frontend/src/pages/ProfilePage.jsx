@@ -1,14 +1,23 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Camera, Mail, User } from "lucide-react";
+import toast from "react-hot-toast";
+import { validateImageFile } from "../lib/utils";
 
 const ProfilePage = () => {
   const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
   const [selectedImg, setSelectedImg] = useState(null);
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
+
+    const fileError = validateImageFile(file);
+    if (fileError) {
+      toast.error(fileError);
+      e.target.value = "";
+      return;
+    }
 
     const reader = new FileReader();
 

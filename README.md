@@ -27,6 +27,9 @@ CLOUDINARY_API_KEY=...
 CLOUDINARY_API_SECRET=...
 
 NODE_ENV=development
+
+# Optional: frontend origin allowed by CORS/Socket.IO (defaults to http://localhost:5173)
+CLIENT_URL=http://localhost:5173
 ```
 
 ### Build the app
