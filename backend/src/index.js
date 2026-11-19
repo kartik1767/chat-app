@@ -12,6 +12,7 @@ import { CLIENT_URL } from "./lib/utils.js";
 
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
+import friendRoutes from "./routes/friend.route.js";
 import { app, server } from "./lib/socket.js";
 
 const PORT = process.env.PORT || 5001;
@@ -31,6 +32,7 @@ app.use(
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/friends", friendRoutes);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));

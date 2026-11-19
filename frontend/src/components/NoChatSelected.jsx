@@ -19,7 +19,8 @@ const NoChatSelected = () => {
         {/* Welcome Text */}
         <h2 className="text-2xl font-bold">Welcome to GupShup!</h2>
         <p className="text-base-content/60">
-          Select a conversation from the sidebar to start chatting
+          Pick a friend from the sidebar to start chatting, or use the{" "}
+          <span className="font-medium">add friend</span> button to send someone a request.
         </p>
       </div>
     </div>

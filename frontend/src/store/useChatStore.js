@@ -80,4 +80,19 @@ export const useChatStore = create((set, get) => ({
   },
 
   setSelectedUser: (selectedUser) => set({ selectedUser, messages: [] }),
+
+  // `users` is the friends list shown in the sidebar
+  addFriend: (user) =>
+    set((s) => ({
+      users: s.users.some((u) => u._id === user._id)
+        ? s.users
+        : [...s.users, user].sort((a, b) => a.fullName.localeCompare(b.fullName)),
+    })),
+
+  removeFriend: (userId) =>
+    set((s) => ({
+      users: s.users.filter((u) => u._id !== userId),
+      // Close the chat if it was with the person who is no longer a friend
+      ...(s.selectedUser?._id === userId ? { selectedUser: null, messages: [] } : {}),
+    })),
 }));

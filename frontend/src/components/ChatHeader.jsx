@@ -1,10 +1,18 @@
-import { X } from "lucide-react";
+import { UserMinus, X } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
+import { useFriendStore } from "../store/useFriendStore";
 
 const ChatHeader = () => {
   const { selectedUser, setSelectedUser } = useChatStore();
   const { onlineUsers } = useAuthStore();
+  const { removeFriend, pendingIds } = useFriendStore();
+
+  const handleUnfriend = () => {
+    if (window.confirm(`Remove ${selectedUser.fullName} from your friends? You won't be able to message each other.`)) {
+      removeFriend(selectedUser);
+    }
+  };
 
   return (
     <div className="p-2.5 border-b border-base-300">
@@ -26,10 +34,26 @@ const ChatHeader = () => {
           </div>
         </div>
 
-        {/* Close button */}
-        <button onClick={() => setSelectedUser(null)}>
-          <X />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            className="btn btn-sm btn-ghost btn-square"
+            onClick={handleUnfriend}
+            disabled={pendingIds.includes(selectedUser._id)}
+            title="Remove friend"
+            aria-label={`Remove ${selectedUser.fullName} from friends`}
+          >
+            <UserMinus className="size-5" />
+          </button>
+
+          {/* Close button */}
+          <button
+            className="btn btn-sm btn-ghost btn-square"
+            onClick={() => setSelectedUser(null)}
+            aria-label="Close chat"
+          >
+            <X />
+          </button>
+        </div>
       </div>
     </div>
   );
