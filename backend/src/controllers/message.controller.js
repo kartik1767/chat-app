@@ -4,6 +4,9 @@ import Message from "../models/message.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import { io, userRoom } from "../lib/socket.js";
 import { validateImageDataUrl } from "../lib/utils.js";
+import { areFriends, getFriendIds, PUBLIC_USER_FIELDS } from "../lib/friends.js";
+
+const NOT_FRIENDS_MESSAGE = "You can only chat with your friends. Send a friend request first.";
 
 const MAX_TEXT_LENGTH = 5000;
 
@@ -11,12 +14,12 @@ const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 export const getUsersForSidebar = async (req, res) => {
   try {
-    const loggedInUserId = req.user._id;
-    // Only what the sidebar needs; don't hand every user's email to every other user
-    const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select(
-      "fullName profilePic"
-    );
-    res.status(200).json(filteredUsers);
+    // The sidebar only lists friends; strangers are found through friend search
+    const friendIds = await getFriendIds(req.user._id);
+    const friends = await User.find({ _id: { $in: friendIds } })
+      .select(PUBLIC_USER_FIELDS)
+      .sort({ fullName: 1 });
+    res.status(200).json(friends);
   } catch (error) {
     console.error("Error in getUsersForSidebar:", error.message);
     res.status(500).json({ message: "Internal server error" });
@@ -30,6 +33,10 @@ export const getMessages = async (req, res) => {
 
     if (!isValidId(userToChatId)) {
       return res.status(400).json({ message: "Invalid user id" });
+    }
+
+    if (!(await areFriends(myId, userToChatId))) {
+      return res.status(403).json({ message: NOT_FRIENDS_MESSAGE });
     }
 
     const messages = await Message.find({
@@ -73,6 +80,10 @@ export const sendMessage = async (req, res) => {
     const receiverExists = await User.exists({ _id: receiverId });
     if (!receiverExists) {
       return res.status(404).json({ message: "Recipient not found" });
+    }
+
+    if (!(await areFriends(senderId, receiverId))) {
+      return res.status(403).json({ message: NOT_FRIENDS_MESSAGE });
     }
 
     let imageUrl;

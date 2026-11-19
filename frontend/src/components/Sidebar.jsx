@@ -1,15 +1,22 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
-import { Users } from "lucide-react";
+import { UserPlus, Users } from "lucide-react";
+import { useFriendStore } from "../store/useFriendStore";
+import FriendsModal from "./FriendsModal";
 
 const Sidebar = () => {
   const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
+  const { incoming } = useFriendStore();
 
-  const { onlineUsers, authUser } = useAuthStore();
-  const onlineContactsCount = onlineUsers.filter((id) => id !== authUser?._id).length;
+  const { onlineUsers } = useAuthStore();
+  // `users` is the friends list, so this counts online friends
+  const onlineContactsCount = users.filter((u) => onlineUsers.includes(u._id)).length;
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  const [friendsModal, setFriendsModal] = useState({ open: false, tab: "find" });
+  const openFriends = (tab = "find") => setFriendsModal({ open: true, tab });
+  const closeFriends = useCallback(() => setFriendsModal((m) => ({ ...m, open: false })), []);
 
   useEffect(() => {
     getUsers();
@@ -24,11 +31,23 @@ const Sidebar = () => {
   return (
     <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
       <div className="border-b border-base-300 w-full p-5">
-        <div className="flex items-center gap-2">
-          <Users className="size-6" />
-          <span className="font-medium hidden lg:block">Contacts</span>
+        <div className="flex flex-col lg:flex-row items-center gap-2">
+          <Users className="size-6 hidden lg:block" />
+          <span className="font-medium hidden lg:block flex-1">Friends</span>
+          <button
+            className="btn btn-sm btn-ghost btn-square relative"
+            onClick={() => openFriends(incoming.length > 0 ? "requests" : "find")}
+            title="Add friends & requests"
+            aria-label={`Add friends${incoming.length ? `, ${incoming.length} pending requests` : ""}`}
+          >
+            <UserPlus className="size-5" />
+            {incoming.length > 0 && (
+              <span className="badge badge-primary badge-xs absolute -top-1 -right-1 min-w-4 h-4 text-[10px]">
+                {incoming.length}
+              </span>
+            )}
+          </button>
         </div>
-        {/* TODO: Online filter toggle */}
         <div className="mt-3 hidden lg:flex items-center gap-2">
           <label className="cursor-pointer flex items-center gap-2">
             <input
@@ -78,12 +97,21 @@ const Sidebar = () => {
           </button>
         ))}
 
-        {filteredUsers.length === 0 && (
-          <div className="text-center text-zinc-500 py-4">
-            {showOnlineOnly ? "No online users" : "No contacts yet"}
-          </div>
-        )}
+        {filteredUsers.length === 0 &&
+          (showOnlineOnly ? (
+            <div className="text-center text-zinc-500 py-4 text-sm">No friends online</div>
+          ) : (
+            <div className="text-center text-zinc-500 py-6 px-3 space-y-3">
+              <p className="hidden lg:block text-sm">No friends yet. Add people to start chatting.</p>
+              <button className="btn btn-sm btn-primary gap-1" onClick={() => openFriends("find")}>
+                <UserPlus className="size-4" />
+                <span className="hidden lg:inline">Find people</span>
+              </button>
+            </div>
+          ))}
       </div>
+
+      <FriendsModal open={friendsModal.open} initialTab={friendsModal.tab} onClose={closeFriends} />
     </aside>
   );
 };
